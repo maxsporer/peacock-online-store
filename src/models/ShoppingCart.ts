@@ -20,6 +20,10 @@ export class ShoppingCart {
     });
     return total;
   }
+
+  emptyCart(): void {
+    this.items = [];
+  }
 }
 
 export class Item {
