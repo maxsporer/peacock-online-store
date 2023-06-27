@@ -1,16 +1,16 @@
 {
-  "name": "peacock-ioc-container",
+  "name": "peacock-online-store",
   "version": "1.0.0",
-  "description": "A simple IoC container written in TypeScript",
-  "main": "dist/index.js",
+  "description": "A simple online store app written in TypeScript",
+  "main": "dist/src/index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/src/index.js",
     "build": "tsc",
     "test": "jest"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maxsporer/peacock-ioc-container.git"
+    "url": "git+https://github.com/maxsporer/peacock-online-store.git"
   },
   "keywords": [
     "IoC",
@@ -19,9 +19,9 @@
   "author": "Max Sporer",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/maxsporer/peacock-ioc-container/issues"
+    "url": "https://github.com/maxsporer/peacock-online-store/issues"
   },
-  "homepage": "https://github.com/maxsporer/peacock-ioc-container#readme",
+  "homepage": "https://github.com/maxsporer/peacock-online-store#readme",
   "devDependencies": {
     "@babel/core": "^7.22.5",
     "@babel/preset-env": "^7.22.5",
