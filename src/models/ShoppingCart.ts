@@ -12,6 +12,14 @@ export class ShoppingCart {
   getItems(): any {
     return this.items;
   }
+
+  getTotalPrice(): number {
+    let total = 0;
+    this.items.forEach(([item, quantity]) => {
+      total += item.price * quantity;
+    });
+    return total;
+  }
 }
 
 export class Item {
