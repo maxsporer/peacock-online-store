@@ -1,12 +1,24 @@
-export class ShoppingCart {
-  private items: [Item, number][];
+import { Database } from '../services/Database';
+import { OrderManager } from '../services/OrderManager';
+import { Items } from '../types/items';
 
-  constructor() {
-    this.items = [];
+export class ShoppingCart {
+  private items: Items;
+  private db: Database;
+  private om: OrderManager;
+
+  constructor(items: Items, db: Database, om: OrderManager) {
+    this.items = items;
+    this.db = db;
+    this.om = om;
   }
 
-  addItem(item: Item, quantity: number) {
-    this.items.push([item, quantity]);
+  addItem(item: string, quantity: number): void {
+    if (this.db.getItemQuantity(item) >= quantity) {
+      this.items[item] = quantity;
+    } else {
+      console.log(`Not enough ${item}s stock.`);
+    }
   }
 
   getItems(): any {
@@ -15,17 +27,19 @@ export class ShoppingCart {
 
   getTotalPrice(): number {
     let total = 0;
-    this.items.forEach(([item, quantity]) => {
-      total += item.price * quantity;
-    });
+    for (const item in this.items) {
+      total += this.db.getItemPrice(item);
+    }
     return total;
   }
 
   emptyCart(): void {
-    this.items = [];
+    this.items = {};
   }
-}
 
-export class Item {
-  constructor(public name: string, public price: number) {}
+  checkout(): number {
+    const orderId = this.om.createOrder(this.items);
+    this.emptyCart();
+    return orderId;
+  }
 }
