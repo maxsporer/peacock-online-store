@@ -1,32 +1,71 @@
 import { ShoppingCart } from '../../src/models/ShoppingCart';
+import { IoCContainer } from 'mspo-ioc-container/lib';
 
 describe('ShoppingCart', () => {
-  // let cart: ShoppingCart;
-  // let itemA: Item;
-  // let itemB: Item;
+  let sp: ShoppingCart;
+  let dbMock: any;
+  let omMock: any;
+  let consoleSpy: jest.SpyInstance;
 
-  // beforeEach(() => {
-  //   cart = new ShoppingCart();
-  //   itemA = new Item('Test Item A', 5);
-  //   itemB = new Item('Test Item B', 10);
+  beforeEach(() => {
+    const container = new IoCContainer();
+    dbMock = {
+      getItemQuantity: jest.fn(),
+      getItemPrice: jest.fn()
+    };
+    omMock = {
+      createOrder: jest.fn()
+    }
+    container.bind('db', dbMock);
+    container.bind('om', omMock);
 
-  //   cart.addItem(itemA, 2);
-  //   cart.addItem(itemB, 3)
-  // });
+    const items = {};
+    sp = new ShoppingCart(items, container.resolve('db'), container.resolve('om'));
 
-  // test('should add items to the cart', () => {
-  //   expect(cart.getItems()).toEqual([
-  //     [ { name: 'Test Item A', price: 5 }, 2 ],
-  //     [ { name: 'Test Item B', price: 10 }, 3 ]
-  //   ]);
-  // });
+    consoleSpy = jest.spyOn(console, 'log');
+  });
 
-  // test('should calculate the correct total price', () => {
-  //   expect(cart.getTotalPrice()).toBe(40);
-  // });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-  // test('should empty the cart', () => {
-  //   cart.emptyCart();
-  //   expect(cart.getItems()).toEqual([]);
-  // })
+  test('addItem should add item to cart when enough quantity is available', () => {
+    dbMock.getItemQuantity.mockReturnValue(10);
+    sp.addItem('testItem', 5);
+    expect(sp.getItems()).toEqual({ testItem: 5 });
+  });
+
+  test('addItem should not add item to cart when not enough quantity is available', () => {
+    dbMock.getItemQuantity.mockReturnValue(10);
+    sp.addItem('testItem', 15);
+    expect(sp.getItems()).toEqual({});
+    expect(consoleSpy).toHaveBeenCalledWith('Not enough testItems stock.');
+  });
+
+  test('getTotalPrice should calculate the correct total price', () => {
+    dbMock.getItemQuantity.mockReturnValue(10);
+    dbMock.getItemPrice.mockReturnValue(10);
+    sp.addItem('testItemA', 1);
+    sp.addItem('testItemB', 1);
+    expect(sp.getTotalPrice()).toEqual(20);
+  });
+
+  test('emptyCart should remove all items from cart', () => {
+    dbMock.getItemQuantity.mockReturnValue(10);
+    sp.addItem('testItemA', 1);
+    sp.addItem('testItemB', 1);
+    sp.emptyCart();
+    expect(sp.getItems()).toEqual({});
+  });
+
+  test('checkout should create an order and empty the cart', () => {
+    dbMock.getItemQuantity.mockReturnValue(10);
+    const orderId = 0;
+    omMock.createOrder.mockReturnValueOnce(orderId);
+    sp.addItem('testItem', 1);
+    const result = sp.checkout();
+    expect(result).toEqual(orderId);
+    expect(omMock.createOrder).toHaveBeenCalledWith({ testItem: 1});
+    expect(sp.getItems()).toEqual({});
+  });
 });
